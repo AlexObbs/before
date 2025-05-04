@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOAB Client Portal - Floating Island Navigation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #006D77;
+            --primary-light: #83C5BE;
+            --secondary: #E29578;
+            --secondary-light: #FFDDD2;
+            --dark: #1A535C;
+            --light: #EDF6F9;
+            --gray: #6c757d;
+            --gray-light: #dee2e6;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--light);
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            min-height: 100vh;
+        }
+
+        /* Utility Classes */
+        .container {
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d28468;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--dark);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #555;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 0;
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+            text-decoration: none;
+        }
+
+        .logo-safari {
+            color: var(--primary);
+        }
+
+        .logo-portal {
+            color: var(--dark);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            min-height: calc(100vh - 100px);
+            padding-bottom: 60px;
+        }
+
+        /* Section Transition */
+        .section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            display: none;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            margin-bottom: 25px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h3 {
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .card-footer {
+            padding: 15px 25px;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Banner */
+        .banner {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            color: white;
+            height: 300px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .banner-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0, 109, 119, 0.9) 0%, rgba(0, 109, 119, 0.6) 100%);
+            z-index: 2;
+        }
+
+        .banner-content {
+            position: relative;
+            z-index: 3;
+            padding: 40px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .banner-content h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+        }
+
+        .banner-content p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 25px;
+            max-width: 600px;
+        }
+
+        /* Info Items */
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 109, 119, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-right: 15px;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .info-content h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .info-content p {
+            margin: 0;
+            color: var(--gray);
+        }
+
+        /* Grid Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 640px) {
+            .grid-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .grid-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Timeline */
+        .timeline-item {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray-light);
+            position: relative;
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .timeline-date {
+            color: var(--gray);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .timeline-event {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        /* Proposal Card */
+        .proposal-card {
+            border: 1px solid var(--gray-light);
+            border-radius: 15px;
+            padding: 25px;
+            transition: var(--transition);
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .proposal-card:hover {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+            transform: translateY(-8px);
+        }
+
+        .proposal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .proposal-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag-primary {
+            background-color: rgba(0, 109, 119, 0.1);
+            color: var(--primary);
+        }
+
+        .tag-secondary {
+            background-color: rgba(226, 149, 120, 0.1);
+            color: var(--secondary);
+        }
+
+        .tag-dark {
+            background-color: rgba(26, 83, 92, 0.1);
+            color: var(--dark);
+        }
+
+        .proposal-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .proposal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .proposal-price {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .proposal-link {
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .proposal-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 30px 0;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--gray-light);
+            z-index: 1;
+        }
+
+        .progress-steps::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 35%;
+            height: 2px;
+            background-color: var(--primary);
+            z-index: 1;
+            transition: width 0.5s ease;
+        }
+
+        .progress-step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .step-bubble {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            transition: var(--transition);
+        }
+
+        .step-bubble.active {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .step-bubble.completed {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .progress-step.active .step-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .progress-step.completed .step-label {
+            color: var(--primary);
+        }
+
+        /* Innovative Floating Navigation */
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .nav-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+        .nav-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-toggle.active {
+            transform: rotate(45deg);
+        }
+
+        .nav-toggle i {
+            font-size: 1.5rem;
+        }
+
+        .nav-bubble {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .nav-bubble.visible {
+            width: 80px;
+            height: 80px;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .nav-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-bubble-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .nav-bubble i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .nav-bubble span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--dark);
+            opacity: 0;
+            transition: var(--transition);
+            transform: translateY(5px);
+        }
+
+        .nav-bubble.visible:hover span {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-bubble.has-badge::after {
+            content: attr(data-badge);
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Side Menu for Extra Options */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: white;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .side-menu.open {
+            right: 0;
+        }
+
+        .side-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .side-menu-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .side-menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .side-menu-header h3 {
+            margin: 0;
+        }
+
+        .side-menu-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--gray);
+            cursor: pointer;
+        }
+
+        .side-menu-content {
+            padding: 20px;
+        }
+
+        .side-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray-light);
+            text-decoration: none;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .side-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .side-menu-item i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            color: var(--primary);
+            width: 24px;
+            text-align: center;
+        }
+
+        .side-menu-item span {
+            font-weight: 500;
+        }
+
+        .side-menu-item:hover {
+            transform: translateX(5px);
+            color: var(--primary);
+        }
+
+        .side-menu-footer {
+            padding: 20px;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--dark);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Loader */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-content {
+            text-align: center;
+        }
+
+        .loader-spinner {
+            width: 70px;
+            height: 70px;
+            border: 5px solid rgba(0, 109, 119, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Extra Navigation Elements */
+        .context-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 30px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 990;
+            opacity: 0;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .context-indicator.visible {
+            opacity: 1;
+            bottom: 30px;
+        }
+
+        .context-indicator i {
+            margin-right: 5px;
+        }
+
+        /* Section Content Padding */
+        .section-content {
+            padding: 20px 0;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .banner-content {
+                padding: 30px 20px;
+            }
+
+            .banner-content h2 {
+                font-size: 1.8rem;
+            }
+
+            .nav-bubble.visible {
+                width: 60px;
+                height: 60px;
+            }
+
+            .nav-bubble i {
+                font-size: 1.3rem;
+                margin-bottom: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader" id="pageLoader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <h3>Loading Your Safari Experience</h3>
+            <p>Preparing your adventure...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-inner">
+                <!-- Logo -->
+                <a href="#" class="logo">
+                    <span class="logo-safari">KenyaOnABudget </span><span class="logo-portal"> Safaris</span>
+                </a>
+
+                <!-- User Menu -->
+                <div class="user-menu">
+                    <button class="btn btn-outline" onclick="toggleSideMenu()">
+                        <i class="fas fa-bars" style="margin-right: 8px;"></i> Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Overview Section -->
+            <section id="overview-section" class="section active">
+                <div class="section-content">
+                    <!-- Welcome Banner -->
+                    <div class="banner">
+                        <img src="/api/placeholder/1200/400" alt="Safari Landscape" class="banner-image">
+                        <div class="banner-overlay"></div>
+                        <div class="banner-content">
+                            <h2>Welcome to Your Safari Adventure</h2>
+                            <p>Manage your upcoming journey, view itineraries, and connect with your safari team - all in one place.</p>
+                            <button class="btn btn-secondary" onclick="navigateTo('itinerary')">
+                                View Your Trip <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Booking Progress -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Your Safari Journey</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-steps">
+                                    <div class="progress-step completed">
+                                        <div class="step-bubble completed">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <div class="step-label">Booking Confirmed</div>
+                                    </div>
+                                    <div class="progress-step completed">
+                                        <div class="step-bubble completed">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <div class="step-label">Deposit Paid</div>
+                                    </div>
+                                    <div class="progress-step active">
+                                        <div class="step-bubble active">3</div>
+                                        <div class="step-label">Final Payment</div>
+                                    </div>
+                                    <div class="progress-step">
+                                        <div class="step-bubble">4</div>
+                                        <div class="step-label">Travel Documents</div>
+                                    </div>
+                                    <div class="progress-step">
+                                        <div class="step-bubble">5</div>
+                                        <div class="step-label">Ready to Depart</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overview Grid -->
+                    <div class="grid-container">
+                        <!-- Trip Details -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Your Safari at a Glance</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-map"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h4>Serengeti National Park</h4>
+                                        <p>Your 7-day adventure begins on July 15, 2025</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h4>Your Group</h4>
+                                        <p>4 travelers with private guide</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-hotel"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h4>Accommodations</h4>
+                                        <p>Luxury tented camps & lodges</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-car"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h4>Transportation</h4>
+                                        <p>Private 4x4 safari vehicle with pop-up roof</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Events -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Upcoming</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline-item">
+                                    <div class="timeline-date">Today</div>
+                                    <div class="timeline-event">Final payment due</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-date">May 15</div>
+                                    <div class="timeline-event">Pre-trip briefing call</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-date">June 1</div>
+                                    <div class="timeline-event">Receive travel documents</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-date">June 15</div>
+                                    <div class="timeline-event">Visa application deadline</div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn btn-outline" onclick="navigateTo('calendar')">View Calendar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Proposals Section -->
+            <section id="proposals-section" class="section">
+                <div class="section-content">
+                    <h2>Proposal Itineraries</h2>
+                    <p>Review your custom safari itinerary proposals below. Click on any proposal to see the full details.</p>
+                    
+                    <div class="grid-cards">
+                        <div class="proposal-card">
+                            <div class="proposal-header">
+                                <h3 class="proposal-title">Classic Safari Experience</h3>
+                                <span class="tag tag-primary">RECOMMENDED</span>
+                            </div>
+                            <p class="proposal-desc">7 days exploring Serengeti & Ngorongoro Crater with wildlife viewing focus</p>
+                            <div class="proposal-footer">
+                                <span class="proposal-price">$4,250 per person</span>
+                                <a href="#" class="proposal-link">View Details</a>
+                            </div>
+                        </div>
+                        
+                        <div class="proposal-card">
+                            <div class="proposal-header">
+                                <h3 class="proposal-title">Luxury Safari Adventure</h3>
+                                <span class="tag tag-secondary">PREMIUM</span>
+                            </div>
+                            <p class="proposal-desc">10 days with private air transfers & exclusive luxury camps</p>
+                            <div class="proposal-footer">
+                                <span class="proposal-price">$7,890 per person</span>
+                                <a href="#" class="proposal-link">View Details</a>
+                            </div>
+                        </div>
+                        
+                        <div class="proposal-card">
+                            <div class="proposal-header">
+                                <h3 class="proposal-title">Cultural Immersion Safari</h3>
+                                <span class="tag tag-dark">CULTURAL</span>
+                            </div>
+                            <p class="proposal-desc">9 days combining wildlife viewing with authentic Maasai village visits</p>
+                            <div class="proposal-footer">
+                                <span class="proposal-price">$5,450 per person</span>
+                                <a href="#" class="proposal-link">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Itinerary Section -->
+            <section id="itinerary-section" class="section">
+                <div class="section-content">
+                    <h2>Your Itinerary</h2>
+                    <p>Detailed day-by-day breakdown of your safari adventure.</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 40px 20px; color: #888;">
+                                [Detailed itinerary content would appear here]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Other Sections (Placeholder Content) -->
+            <section id="upgrades-section" class="section">
+                <div class="section-content">
+                    <h2>Optional Upgrades</h2>
+                    <p>Enhance your safari experience with these premium additions.</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 40px 20px; color: #888;">
+                                [Optional upgrades content would appear here]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="team-section" class="section">
+                <div class="section-content">
+                    <h2>Safari Team</h2>
+                    <p>Meet the dedicated professionals who will guide your journey.</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 40px 20px; color: #888;">
+                                [Team member profiles would appear here]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="accommodation-section" class="section">
+                <div class="section-content">
+                    <h2>Accommodation</h2>
+                    <p>Luxury lodges and camps where you'll stay during your safari.</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 40px 20px; color: #888;">
+                                [Accommodation details would appear here]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="messages-section" class="section">
+                <div class="section-content">
+                    <h2>Messages</h2>
+                    <p>Communication with your safari consultant and team.</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 40px 20px; color: #888;">
+                                [Messages would appear here]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="guides-section" class="section">
+                <div class="section-content">
+                    <h2>Tour Guides</h2>
+                    <p>Information about your expert guides and their specialties.</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 40px 20px; color: #888;">
+                                [Guide profiles would appear here]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="calendar-section" class="section">
+                <div class="section-content">
+                    <h2>Calendar</h2>
+                    <p>Your schedule and important dates for your safari journey.</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 40px 20px; color: #888;">
+                                [Calendar view would appear here]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Innovative Floating Navigation System -->
+    <div class="nav-container" id="navContainer">
+        <!-- Navigation bubbles will be inserted here by JavaScript -->
+    </div>
+
+    <!-- Navigation Toggle Button -->
+    <div class="nav-toggle" id="navToggle">
+        <i class="fas fa-compass"></i>
+    </div>
+
+    <!-- Context Indicator -->
+    <div class="context-indicator" id="contextIndicator">
+        <i class="fas fa-home"></i>
+        <span>Overview</span>
+    </div>
+
+    <!-- Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h3>Menu</h3>
+            <button class="side-menu-close" onclick="toggleSideMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="side-menu-content">
+            <a href="#" class="side-menu-item" onclick="navigateTo('overview')">
+                <i class="fas fa-home"></i>
+                <span>Overview</span>
+            </a>
+            <a href="#" class="side-menu-item" onclick="navigateTo('proposals')">
+                <i class="fas fa-file-alt"></i>
+                <span>Proposal Itineraries</span>
+            </a>
+            <a href="#" class="side-menu-item" onclick="navigateTo('itinerary')">
+                <i class="fas fa-map"></i>
+                <span>Itinerary</span>
+            </a>
+            <a href="#" class="side-menu-item" onclick="navigateTo('upgrades')">
+                <i class="fas fa-crown"></i>
+                <span>Optional Upgrades</span>
+            </a>
+            <a href="#" class="side-menu-item" onclick="navigateTo('team')">
+                <i class="fas fa-users"></i>
+                <span>Safari Team</span>
+            </a>
+            <a href="#" class="side-menu-item" onclick="navigateTo('accommodation')">
+                <i class="fas fa-hotel"></i>
+                <span>Accommodation</span>
+            </a>
+            <a href="#" class="side-menu-item" onclick="navigateTo('messages')">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+            <a href="#" class="side-menu-item" onclick="navigateTo('guides')">
+                <i class="fas fa-person-hiking"></i>
+                <span>Tour Guides</span>
+            </a>
+            <a href="#" class="side-menu-item" onclick="navigateTo('calendar')">
+                <i class="fas fa-calendar"></i>
+                <span>Calendar</span>
+            </a>
+        </div>
+        <div class="side-menu-footer">
+            <button class="btn btn-secondary" style="width: 100%;" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Side Menu Overlay -->
+    <div class="side-menu-overlay" id="sideMenuOverlay" onclick="toggleSideMenu()"></div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Navigation Items Configuration
+        const navigationItems = [
+            { id: 'overview', icon: 'fa-home', label: 'Overview' },
+            { id: 'proposals', icon: 'fa-file-alt', label: 'Proposals' },
+            { id: 'itinerary', icon: 'fa-map', label: 'Itinerary' },
+            { id: 'upgrades', icon: 'fa-crown', label: 'Upgrades', badge: '2' },
+            { id: 'team', icon: 'fa-users', label: 'Team' },
+            { id: 'accommodation', icon: 'fa-hotel', label: 'Lodging' },
+            { id: 'messages', icon: 'fa-envelope', label: 'Messages', badge: '3' },
+            { id: 'guides', icon: 'fa-person-hiking', label: 'Guides' },
+            { id: 'calendar', icon: 'fa-calendar', label: 'Calendar' }
+        ];
+
+        // DOM Elements
+        const navToggle = document.getElementById('navToggle');
+        const navContainer = document.getElementById('navContainer');
+        const sideMenu = document.getElementById('sideMenu');
+        const sideMenuOverlay = document.getElementById('sideMenuOverlay');
+        const sections = document.querySelectorAll('.section');
+        const toast = document.getElementById('toast');
+        const contextIndicator = document.getElementById('contextIndicator');
+        const pageLoader = document.getElementById('pageLoader');
+
+        // Current State
+        let isNavOpen = false;
+        let currentSection = 'overview';
+        let navBubbles = [];
+
+        // Initialize Navigation
+        function initializeNavigation() {
+            // Create navigation bubbles
+            navigationItems.forEach((item, index) => {
+                createNavigationBubble(item, index);
+            });
+
+            // Set initial active section
+            updateActiveSection('overview');
+
+            // Add event listeners
+            navToggle.addEventListener('click', toggleNavigation);
+
+            // Load initial section based on URL hash or default to overview
+            const hash = window.location.hash.substring(1);
+            if (hash && document.getElementById(`${hash}-section`)) {
+                navigateTo(hash);
+            }
+        }
+
+        // Create Navigation Bubble
+        function createNavigationBubble(item, index) {
+            const bubble = document.createElement('div');
+            bubble.className = 'nav-bubble';
+            bubble.id = `nav-${item.id}`;
+            bubble.setAttribute('data-section', item.id);
+            
+            if (item.badge) {
+                bubble.className += ' has-badge';
+                bubble.setAttribute('data-badge', item.badge);
+            }
+            
+            bubble.innerHTML = `
+                <div class="nav-bubble-inner">
+                    <i class="fas ${item.icon}"></i>
+                    <span>${item.label}</span>
+                </div>
+            `;
+            
+            bubble.addEventListener('click', () => {
+                navigateTo(item.id);
+                toggleNavigation();
+            });
+            
+            navContainer.appendChild(bubble);
+            navBubbles.push(bubble);
+        }
+
+        // Toggle Navigation
+        function toggleNavigation() {
+            isNavOpen = !isNavOpen;
+            navToggle.classList.toggle('active', isNavOpen);
+            
+            if (isNavOpen) {
+                // Position bubbles in a circle around the toggle button
+                const radius = window.innerWidth < 768 ? 120 : 180;
+                const toggleRect = navToggle.getBoundingClientRect();
+                const centerX = toggleRect.left + toggleRect.width / 2;
+                const centerY = toggleRect.top + toggleRect.height / 2;
+                
+                const bubbleCount = navBubbles.length;
+                const angleStep = (2 * Math.PI) / bubbleCount;
+                
+                navBubbles.forEach((bubble, index) => {
+                    const angle = angleStep * index - Math.PI / 2; // Start from top
+                    const x = centerX + radius * Math.cos(angle);
+                    const y = centerY + radius * Math.sin(angle);
+                    
+                    bubble.style.left = `${x}px`;
+                    bubble.style.top = `${y}px`;
+                    
+                    setTimeout(() => {
+                        bubble.classList.add('visible');
+                    }, index * 50); // Staggered animation
+                });
+
+                // Add ripple effect to nav toggle
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                navToggle.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            } else {
+                // Hide bubbles
+                navBubbles.forEach((bubble, index) => {
+                    setTimeout(() => {
+                        bubble.classList.remove('visible');
+                    }, (navBubbles.length - index - 1) * 50); // Reverse staggered animation
+                });
+            }
+        }
+
+        // Navigate to Section
+        function navigateTo(sectionId) {
+            if (currentSection === sectionId) return;
+            
+            updateActiveSection(sectionId);
+            
+            // Update URL hash
+            window.location.hash = sectionId;
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Show context indicator
+            const navItem = navigationItems.find(item => item.id === sectionId);
+            if (navItem) {
+                contextIndicator.innerHTML = `
+                    <i class="fas ${navItem.icon}"></i>
+                    <span>${navItem.label}</span>
+                `;
+                contextIndicator.classList.add('visible');
+                
+                setTimeout(() => {
+                    contextIndicator.classList.remove('visible');
+                }, 2000);
+            }
+        }
+
+        // Update Active Section
+        function updateActiveSection(sectionId) {
+            currentSection = sectionId;
+            
+            // Hide all sections
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(`${sectionId}-section`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+        }
+
+        // Toggle Side Menu
+        function toggleSideMenu() {
+            sideMenu.classList.toggle('open');
+            sideMenuOverlay.classList.toggle('open');
+        }
+
+        // Show Toast Notification
+        function showToast(message, duration = 3000) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // Logout Handler
+        function handleLogout() {
+            showToast('Logging out...');
+            setTimeout(() => {
+                // Redirect to login page or perform logout action
+                alert('You have been logged out.');
+            }, 1500);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (isNavOpen) {
+                toggleNavigation(); // Close and reopen to reposition
+                toggleNavigation();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simulate loading
+            setTimeout(() => {
+                pageLoader.classList.add('fade-out');
+                initializeNavigation();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
